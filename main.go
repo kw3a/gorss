@@ -1,8 +1,8 @@
 package main
 
 import (
+	"database/sql"
 	"flag"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -10,12 +10,12 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/go-chi/cors"
 	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
+	"gitlab.com/kw3a/go-rss/internal/database"
 )
 
 type apiConfig struct {
-	fileserverHits int
-	jwtSecret      string
-	polkaKey       string
+	DB *database.Queries
 }
 
 var dbg = flag.Bool("debug", false, "Enable debug mode")
@@ -25,17 +25,26 @@ func main() {
 	godotenv.Load()
 
 	port := os.Getenv("PORT")
-
-	if *dbg {
-		err := os.Remove("database.json")
-		if err != nil {
-			fmt.Println("Database delete error:", err)
-		}
+	if port == "" {
+		log.Fatal("PORT isn't found in the environment")
 	}
 
+	dbUrl := os.Getenv("DB_URL")
+	if dbUrl == "" {
+		log.Fatal("DB_URL isn't found in the environment")
+	}
+	conn, err := sql.Open("postgres", dbUrl)
+	if err != nil {
+		log.Fatal("Can't connect to database")
+	}
+	queries := database.New(conn)
+	apiCfg := apiConfig{
+		DB: queries,
+	}
 	r := chi.NewRouter()
 
 	v1 := chi.NewRouter()
+	v1.Post("/users", apiCfg.handlerCreateUser)
 	v1.Get("/readiness", handlerReadiness)
 	v1.Get("/error", handlerError)
 	r.Use(cors.Handler(cors.Options{
