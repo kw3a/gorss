@@ -50,6 +50,9 @@ func main() {
 	v1.Get("/error", handlerError)
 	v1.Post("/feeds", apiCfg.middlewareAuth(apiCfg.handlerCreateFeed))
 	v1.Get("/feeds", apiCfg.handlerGetFeeds)
+	v1.Post("/feed_follows", apiCfg.middlewareAuth(apiCfg.handlerCreateFeedFollow))
+	v1.Get("/feed_follows", apiCfg.middlewareAuth(apiCfg.handlerGetUserFeedFollows))
+	v1.Delete("/feed_follows/{feedFollowID}", apiCfg.middlewareAuth(apiCfg.handlerDeleteFeedFollow))
 	r.Use(cors.Handler(cors.Options{
 		// AllowedOrigins:   []string{"https://foo.com"}, // Use this to allow specific origin hosts
 		AllowedOrigins: []string{"https://*", "http://*"},
