@@ -10,9 +10,10 @@ import (
 	"gitlab.com/kw3a/go-rss/internal/database"
 )
 
-func (apiCfg *apiConfig) handlerCreateUser(w http.ResponseWriter, r *http.Request) {
+func (apiCfg *apiConfig) handlerCreateFeed(w http.ResponseWriter, r *http.Request, user database.User) {
 	type parameters struct {
 		Name string `json:"name"`
+		Url  string `json:"url"`
 	}
 	decoder := json.NewDecoder(r.Body)
 	params := parameters{}
@@ -21,19 +22,17 @@ func (apiCfg *apiConfig) handlerCreateUser(w http.ResponseWriter, r *http.Reques
 		respondWithError(w, http.StatusBadRequest, fmt.Sprintf("Error parsing json:%v", err))
 		return
 	}
-	dbUser, err := apiCfg.DB.CreateUser(r.Context(), database.CreateUserParams{
+	dbFeed, err := apiCfg.DB.CreateFeed(r.Context(), database.CreateFeedParams{
 		ID:        uuid.New(),
 		CreatedAt: time.Now().UTC(),
 		UpdatedAt: time.Now().UTC(),
 		Name:      params.Name,
+		Url:       params.Url,
+		UserID:    user.ID,
 	})
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, fmt.Sprintf("Couldn't create user:%v", err))
+		respondWithError(w, http.StatusBadRequest, fmt.Sprintf("Couldn't create feed:%v", err))
 		return
 	}
-	respondWithJSON(w, http.StatusCreated, databaseUserToUser(dbUser))
-}
-
-func (apiCfg *apiConfig) handlerGetUser(w http.ResponseWriter, r *http.Request, dbUser database.User) {
-	respondWithJSON(w, http.StatusOK, databaseUserToUser(dbUser))
+	respondWithJSON(w, http.StatusCreated, databaseFeedToFeed(dbFeed))
 }
