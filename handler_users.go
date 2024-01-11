@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"gitlab.com/kw3a/go-rss/internal/auth"
 	"gitlab.com/kw3a/go-rss/internal/database"
 )
 
@@ -32,4 +33,18 @@ func (apiCfg *apiConfig) handlerCreateUser(w http.ResponseWriter, r *http.Reques
 		return
 	}
 	respondWithJSON(w, http.StatusCreated, databaseUserToUser(dbUser))
+}
+
+func (apiCfg *apiConfig) handlerGetUser(w http.ResponseWriter, r *http.Request) {
+	apiKey, err := auth.GetApiKey(r.Header)
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, err.Error())
+		return
+	}
+	dbUser, err := apiCfg.DB.GetUser(r.Context(), apiKey)
+	if err != nil {
+		respondWithError(w, http.StatusNotFound, err.Error())
+		return
+	}
+	respondWithJSON(w, http.StatusOK, databaseUserToUser(dbUser))
 }

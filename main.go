@@ -45,6 +45,7 @@ func main() {
 
 	v1 := chi.NewRouter()
 	v1.Post("/users", apiCfg.handlerCreateUser)
+	v1.Get("/users", apiCfg.handlerGetUser)
 	v1.Get("/readiness", handlerReadiness)
 	v1.Get("/error", handlerError)
 	r.Use(cors.Handler(cors.Options{
