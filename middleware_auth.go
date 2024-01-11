@@ -18,7 +18,7 @@ func (apiCfg *apiConfig) middlewareAuth(handler authedHandler) http.HandlerFunc 
 		}
 		dbUser, err := apiCfg.DB.GetUser(r.Context(), apiKey)
 		if err != nil {
-			respondWithError(w, http.StatusNotFound, err.Error())
+			respondWithError(w, http.StatusNotFound, "User not found")
 			return
 		}
 		handler(w, r, dbUser)

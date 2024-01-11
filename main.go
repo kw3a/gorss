@@ -48,6 +48,8 @@ func main() {
 	v1.Get("/users", apiCfg.middlewareAuth(apiCfg.handlerGetUser))
 	v1.Get("/readiness", handlerReadiness)
 	v1.Get("/error", handlerError)
+	v1.Post("/feeds", apiCfg.middlewareAuth(apiCfg.handlerCreateFeed))
+	v1.Get("/feeds", apiCfg.handlerGetFeeds)
 	r.Use(cors.Handler(cors.Options{
 		// AllowedOrigins:   []string{"https://foo.com"}, // Use this to allow specific origin hosts
 		AllowedOrigins: []string{"https://*", "http://*"},
